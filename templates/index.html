@@ -10,70 +10,164 @@
 
 <body>
 
-    <h2>YouTube Comment Sentiment Analysis</h2>
+    <h2>Sentiment Analysis of Youtube Comments</h2>
 
-    <form method="POST">
-        <input type="text" name="video_id" placeholder="Enter YouTube Video ID" required>
-        <button type="submit">Analyze</button>
-    </form>
+    <!-- ================= INPUT SECTION ================= -->
+    <div class="input-card">
+        <form method="POST" class="center-row">
+            <div class="input-container">
+                <input type="text" name="video_id" placeholder="Enter YouTube Video ID">
+                <h5>Usually you find the video id in the url which is after "="</h5>
+            </div>
+            <button type="submit">Analyze Sentiment</button>
+        </form>
+    </div>
+
+
 
     {% if error %}
     <p class="error">{{ error }}</p>
     {% endif %}
 
     {% if results %}
-    <p><strong>Total comments analyzed:</strong> {{ results|length }}</p>
     {% if sentiment_counts %}
-    <div class="sentiment-summary">
-        <span class="positive">
-            Positive: {{ sentiment_counts.get('Positive', 0) }}
-        </span>
+    <div class="row g-4 mb-4">
 
-        <span class="neutral">
-            Neutral: {{ sentiment_counts.get('Neutral', 0) }}
-        </span>
+        <!-- Total Comments -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-title">Total Comments</p>
+                    <h3 class="kpi-value">{{ results|length}}</h3>
+                </div>
+                <div class="kpi-icon blue">
+                    💬
+                </div>
+            </div>
+        </div>
 
-        <span class="negative">
-            Negative: {{ sentiment_counts.get('Negative', 0) }}
-        </span>
+        <!-- Positive -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-title">Positive Sentiment</p>
+                    <h3 class="kpi-value">
+                        {{ ((sentiment_counts.get('Positive',0) / results|length * 100) if results else 0) | round(0) }}
+                        <span>%</span>
+                    </h3>
+                </div>
+                <div class="kpi-icon green">
+                    😊
+                </div>
+            </div>
+        </div>
+
+        <!-- Neutral -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-title">Neutral Sentiment</p>
+                    <h3 class="kpi-value">
+                        {{ ((sentiment_counts.get('Neutral',0) / results|length * 100) if results else 0) | round(0) }}
+                        <span>%</span>
+                    </h3>
+                </div>
+                <div class="kpi-icon yellow">
+                    😐
+                </div>
+            </div>
+        </div>
+
+        <!-- Negative -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-title">Negative Sentiment</p>
+                    <h3 class="kpi-value">
+                        {{ ((sentiment_counts.get('Negative',0) / results|length * 100) if results else 0) | round(0) }}
+                        <span>%</span>
+                    </h3>
+                </div>
+                <div class="kpi-icon red">
+                    😟
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="container my-4">
+        <div class="row g-4" style="flex-wrap: nowrap;">
+
+            <!-- Donut chart -->
+            <div class="col-12" style="flex: 0 0 40%;">
+                <div class="chart-card h-100">
+                    <h5 class="card-title">Sentiment Distribution</h5>
+
+                    <div class="chart-wrapper donut">
+                        <canvas id="sentimentDonut" data-positive="{{ sentiment_counts.get('Positive', 0) }}"
+                            data-neutral="{{ sentiment_counts.get('Neutral', 0) }}"
+                            data-negative="{{ sentiment_counts.get('Negative', 0) }}">
+                        </canvas>
+                    </div>
+
+                    <div class="info-box mt-3">
+                        ℹ️ Majority of users expressed {{ majority_sentiment | lower }} feedback regarding this video.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar chart -->
+            <div class="col-12" style="flex: 0 0 60%;">
+                <div class="chart-card h-100">
+                    <h5 class="card-title">Sentiment Breakdown</h5>
+
+                    <div class="chart-wrapper bar">
+                        <canvas id="sentimentChart" data-positive="{{ sentiment_counts.get('Positive', 0) }}"
+                            data-neutral="{{ sentiment_counts.get('Neutral', 0) }}"
+                            data-negative="{{ sentiment_counts.get('Negative', 0) }}">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% endif %}
+    {% if summary %}
+    <div class="insights-card">
+        <div class="insights-header">
+            <div class="icon-box">📈</div>
+            <h3>Opinion Insights</h3>
+        </div>
+
+        <ul class="insights-list">
+            {% for item in summary.split('|') %}
+            {% set label = item.split(':')[0].strip() %}
+            {% set text = item.split(':', 1)[1].strip() %}
+
+            <li class="{{ label|lower }}">
+                <strong>{{ label }}:</strong> {{ text }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endif %}
+    {% if results %}
+    <div class ="cloud-img">
+        <h2>Word Cloud from Video Title</h2>
+       <img src="{{ url_for('static', filename='wordclouds/comments_wc.png') }}" alt="Word Cloud"
+        style="max-width: 800px; width: 100%; height: auto;">
+    </div>
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{{ url_for('download_file') }}" class="btn"
+            style="text-decoration: none; background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+            Download complete results as CSV
+        </a>
     </div>
     {% endif %}
 
-    <table>
-        <tr>
-            <th>Comment</th>
-            <th>Sentiment</th>
-            <th>Confidence</th>
-        </tr>
-
-        {% for row in results %}
-        <tr>
-            <td>{{ row.comment }}</td>
-
-            <td class="
-                {% if row.sentiment == 'Positive' %}positive
-                {% elif row.sentiment == 'Negative' %}negative
-                {% else %}neutral
-                {% endif %}
-            ">
-                {{ row.sentiment }}
-            </td>
-
-            <td>{{ row.confidence }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-
-    {% if sentiment_counts %}
-    <h3>Sentiment Distribution</h3>
-
-    <canvas id="sentimentChart" data-positive="{{ sentiment_counts.get('Positive', 0) }}"
-        data-neutral="{{ sentiment_counts.get('Neutral', 0) }}"
-        data-negative="{{ sentiment_counts.get('Negative', 0) }}" width="400" height="200">
-    </canvas>
-    {% endif %}
-    {% endif %}
     <!-- JS ALWAYS loaded at the end -->
     <script src="{{ url_for('static', filename='charts.js') }}"></script>
 

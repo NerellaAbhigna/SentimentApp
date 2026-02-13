@@ -39,4 +39,5 @@ def predict_sentiment(comments):
             "confidence": round(np.max(prob), 3)
         })
 
+
     return results

@@ -1,7 +1,20 @@
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 
-video_id = "_QwXjd_1plk"
-from analyzer.pipeline import analyze_video
+MODEL_PATH = "./model/mt5"
 
-results = analyze_video(video_id=video_id)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH, local_files_only=True)
 
-print(len(results))
+summarizer = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer
+)
+
+text = """
+summarize: India is a diverse country with many languages, cultures,
+and traditions. It has a rapidly growing tech industry.
+"""
+
+output = summarizer(text, max_length=60, do_sample=False)
+print(output[0]["generated_text"])
