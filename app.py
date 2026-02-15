@@ -6,6 +6,15 @@ from analyzer.validators import validate_input
 
 app = Flask(__name__)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template("500.html"), 500
+
 @app.route("/download")
 def download_file():
     return send_from_directory("data", "results.csv", as_attachment=True)
@@ -34,7 +43,7 @@ def index():
                 results = output.get("results", [])
                 summary = output.get("summary")
                 wc_path = output.get("wordcloud_path")
-                
+                video_details = output.get("video_details")
                 # Check for error returned from pipeline
                 pipeline_error = output.get("error")
                 
@@ -59,7 +68,8 @@ def index():
         majority_sentiment=majority_sentiment,
         summary=summary,
         wc_path=wc_path,
-        error=error
+        error=error,
+        video_details=video_details if 'video_details' in locals() else None
     )
 
 if __name__ == "__main__":

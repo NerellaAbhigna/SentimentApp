@@ -277,3 +277,11 @@ h5 {
     text-align: center;
     margin: 20px 0;
 }
+.video-details {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+   
+    margin: 20px 0;
+}

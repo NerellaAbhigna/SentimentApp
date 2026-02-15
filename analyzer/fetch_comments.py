@@ -1,3 +1,5 @@
+import requests
+from requests.exceptions import RequestException, ConnectionError, Timeout, HTTPError
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import os
@@ -22,6 +24,18 @@ class CommentsDisabledError(VideoError):
 
 class InvalidVideoIDError(VideoError):
     """Raised when video ID is invalid"""
+    pass
+
+class NetworkError(VideoError):
+    """Raised when there are general network problems"""
+    pass
+
+class NetworkTimeoutError(NetworkError):
+    """Raised when a network request times out"""
+    pass
+
+class NetworkConnectionError(NetworkError):
+    """Raised when there's a connection problem (no internet, DNS failure, etc.)"""
     pass
 
 
@@ -131,3 +145,30 @@ def fetch_comments_all(video_id):
             raise VideoError(f"Error fetching comments: {error_details}")
     
     return comments
+
+
+
+def fetch_video_details(video_id):
+    url = "https://www.googleapis.com/youtube/v3/videos"
+    params = {
+        "part": "snippet,statistics",
+        "id": video_id,
+        "key": API_KEY
+    }
+
+    res = requests.get(url, params=params).json()
+
+    if not res.get("items"):
+        return None
+
+    video = res["items"][0]
+    snippet = video["snippet"]
+    stats = video["statistics"]
+
+    return {
+        "title": snippet["title"],
+        "description": snippet["description"],
+        "published_at": snippet["publishedAt"],
+        "views": stats.get("viewCount", 0),
+        "likes": stats.get("likeCount", 0)
+    }

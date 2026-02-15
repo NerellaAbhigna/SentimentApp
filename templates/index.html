@@ -13,21 +13,38 @@
     <h2>Sentiment Analysis of Youtube Comments</h2>
 
     <!-- ================= INPUT SECTION ================= -->
-    <div class="input-card">
-        <form method="POST" class="center-row">
-            <div class="input-container">
-                <input type="text" name="video_id" placeholder="Enter YouTube Video ID">
-                <h5>Usually you find the video id in the url which is after "="</h5>
-            </div>
-            <button type="submit">Analyze Sentiment</button>
-        </form>
-    </div>
+   <div class="input-card">
+    <form method="POST" class="center-row" onsubmit="disableAnalyzeBtn()">
+        <div class="input-container">
+            <input type="text" name="video_id" placeholder="Enter YouTube Video ID" required>
+            <h5>Usually you find the video id in the url which is after "="</h5>
+        </div>
+
+        <button type="submit" id="analyzeBtn">
+            Analyze Sentiment
+        </button>
+    </form>
+</div>
+
 
 
 
     {% if error %}
     <p class="error">{{ error }}</p>
     {% endif %}
+
+
+    {% if video_details %}
+    <div class="video-details">
+        <h3 style="text-align: center;">Video Details</h3>
+        <p><strong>Title:</strong> {{ video_details.title }}</p>
+        <p><strong>Description:</strong> {{ video_details.description }}</p>
+        <p><strong>Published At:</strong> {{ video_details.published_at }}</p>
+        <p><strong>Views:</strong> {{ video_details.views }}</p>
+        <p><strong>Likes:</strong> {{ video_details.likes }}</p>
+    </div>
+    {% endif %}
+
 
     {% if results %}
     {% if sentiment_counts %}
@@ -172,5 +189,12 @@
     <script src="{{ url_for('static', filename='charts.js') }}"></script>
 
 </body>
+<script>
+    function disableAnalyzeBtn() {
+        const btn = document.getElementById("analyzeBtn");
+        btn.disabled = true;
+        btn.innerText = "Analyzing…";
+    }
+</script>
 
 </html>

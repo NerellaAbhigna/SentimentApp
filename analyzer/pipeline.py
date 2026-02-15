@@ -1,5 +1,5 @@
 from unittest import result
-from analyzer.fetch_comments import fetch_comments_all
+from analyzer.fetch_comments import fetch_comments_all,fetch_video_details
 from analyzer.fetch_comments import (
     VideoError, 
     QuotaExceededError, 
@@ -26,13 +26,15 @@ def analyze_video(video_id):
     # 1. Fetch comments - with proper error handling
     try:
         comments = fetch_comments_all(video_id)
+        video_details = fetch_video_details(video_id)  # Optional: Fetch video details for more context
     except QuotaExceededError as e:
         return {
             "results": [],
             "summary": None,
             "wordcloud_path": None,
             "error": str(e),
-            "error_type": "quota_exceeded"
+            "error_type": "quota_exceeded",
+            "video_details": video_details
         }
     except VideoNotFoundError as e:
         return {
@@ -99,5 +101,6 @@ def analyze_video(video_id):
         "summary": summary,
         "wordcloud_path": wc_path,
         "error": None,
-        "error_type": None
+        "error_type": None,
+        "video_details": video_details
     }
