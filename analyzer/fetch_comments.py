@@ -3,8 +3,8 @@ from requests.exceptions import RequestException, ConnectionError, Timeout, HTTP
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import os
-#API_KEY = os.environ.get("API_KEY_VALUE")
-API_KEY= "AIzaSyAGs3__UuQ8xtxKSLU0-buqxzK4aJ2i760"
+API_KEY = os.environ.get("API_KEY_VALUE")
+
 
 class VideoError(Exception):
     """Custom exception for video-related errors"""
